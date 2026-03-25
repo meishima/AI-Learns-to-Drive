@@ -1,113 +1,99 @@
-using UnityEngine;
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
+using Unity.MLAgents.SideChannels;
+using UnityEngine;
 
-public class CarController : MonoBehaviour
-{
-    public enum Axel
-    {
+public class CarController : MonoBehaviour {
+
+    private float m_horizontalInput;
+    private float m_verticalInput;
+    private Rigidbody rb;
+    private float m_currentSteerAngle;
+
+    public enum Axel {
         Front,
-        Rear
+        Back
     }
 
     [Serializable]
-    public struct Wheel
-    {
-        public GameObject wheelModel;
+    public struct Wheel {
         public WheelCollider wheelCollider;
+        public Transform wheelTransform;
         public Axel axel;
     }
 
-    public float maxAcceleration = 30f;
-    public float brakeAcceleration = 50f;
-
-    public float turnSensitivity = 1f;
-    public float maxSteeringAngle = 30f;
-
-    public Vector3 _centerOfMass;
-
     public List<Wheel> wheels;
+    public float maxSteerAngle;
+    public float motorForce;
+    public float brakeForce;
+    public float turnSpeed;
 
-    float moveInput;
-    float steerInput;
-
-    private Rigidbody carRb;
-
-    void Start()
-    {
-        carRb = GetComponent<Rigidbody>();
-        carRb.centerOfMass = _centerOfMass;
+    public void GetInput() {
+        m_horizontalInput = Input.GetAxis("Horizontal");
+        m_verticalInput = Input.GetAxisRaw("Vertical");
     }
 
-    void Update()
-    {
-        getInputs();
-        AnimateWheels();
-    }
+    private void Steer() {
+        float targetAngle = maxSteerAngle * m_horizontalInput;
+        m_currentSteerAngle = Mathf.MoveTowards(m_currentSteerAngle, targetAngle, turnSpeed * Time.fixedDeltaTime);
 
-    void FixedUpdate()
-    {
-        Move();
-        Steer();
-        Brake();
-    }
-
-    void getInputs()
-    {
-        moveInput = Input.GetAxis("Vertical");
-        steerInput = Input.GetAxis("Horizontal");
-    }
-
-    void Move()
-    {
-        foreach (var wheel in wheels)
-        {
-            if (wheel.axel == Axel.Front)
-            {
-                wheel.wheelCollider.motorTorque = moveInput * 600 * maxAcceleration;
-            }
-        }
-    }
-    void Steer()
-    {
-        foreach (var wheel in wheels)
-        {
-            if (wheel.axel == Axel.Front)
-            {
-                var _steerAngle = steerInput * turnSensitivity * maxSteeringAngle;
-                wheel.wheelCollider.steerAngle = Mathf.Lerp(wheel.wheelCollider.steerAngle, _steerAngle, Time.fixedDeltaTime * 10f);
+        foreach(var wheel in wheels) {
+            if(wheel.axel == Axel.Front) {
+                wheel.wheelCollider.steerAngle = m_currentSteerAngle;
             }
         }
     }
 
-    void Brake()
-    {
-        if (Input.GetKey(KeyCode.Space) || moveInput == 0)
-        {
-            foreach (var wheel in wheels)
-            {
-                wheel.wheelCollider.brakeTorque = 800 * brakeAcceleration;
+    private void Accelerate() {
+        foreach(var wheel in wheels) {
+            if(wheel.axel == Axel.Back) {
+                wheel.wheelCollider.motorTorque = m_verticalInput * motorForce;
             }
-
         }
-        else
-        {
-            foreach (var wheel in wheels)
-            {
+    }
+
+    private void Brake() {
+        if(Input.GetKey(KeyCode.Space) || m_verticalInput == 0) {
+            foreach(var wheel in wheels) {
+                wheel.wheelCollider.brakeTorque = brakeForce;
+            }
+        } else {
+            foreach(var wheel in wheels) {
                 wheel.wheelCollider.brakeTorque = 0;
             }
         }
     }
 
-    void AnimateWheels()
-    {
-        foreach(var wheel in wheels)
-        {
+    private void AnimateWheels() {
+        foreach(var wheel in wheels) {
             Quaternion rot;
             Vector3 pos;
             wheel.wheelCollider.GetWorldPose(out pos, out rot);
-            wheel.wheelModel.transform.position = pos;
-            wheel.wheelModel.transform.rotation = rot;
+            wheel.wheelTransform.position = pos;
+            wheel.wheelTransform.rotation = rot;
         }
+    }
+
+    private void Update() {
+        GetInput();
+        LogSpeed();
+    }
+
+    private void Start() {
+        rb = GetComponent<Rigidbody>();   
+    }
+
+    private void LogSpeed() {
+    float speedMetersPerSecond = rb.linearVelocity.magnitude;
+    float speedKPH = speedMetersPerSecond * 3.6f; 
+    Debug.Log($"Speed: {Mathf.RoundToInt(speedKPH)} KM/H");
+    }
+
+    private void FixedUpdate() {
+        Steer();
+        Accelerate();
+        Brake();
+        AnimateWheels();
     }
 }
