@@ -85,9 +85,9 @@ public class CarController : MonoBehaviour {
     }
 
     private void LogSpeed() {
-    float speedMetersPerSecond = rb.linearVelocity.magnitude;
-    float speedKPH = speedMetersPerSecond * 3.6f; 
-    Debug.Log($"Speed: {Mathf.RoundToInt(speedKPH)} KM/H");
+        float speedMetersPerSecond = rb.linearVelocity.magnitude;
+        float speedKPH = speedMetersPerSecond * 3.6f; 
+        //Debug.Log($"Speed: {Mathf.RoundToInt(speedKPH)} KM/H");
     }
 
     private void FixedUpdate() {

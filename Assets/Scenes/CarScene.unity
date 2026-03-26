@@ -252,6 +252,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 775631098}
+  - component: {fileID: 775631099}
   m_Layer: 0
   m_Name: Track
   m_TagString: Untagged
@@ -289,6 +290,20 @@ Transform:
   - {fileID: 400995889}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &775631099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 775631097}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 113d50c538707f7c9a5e87c83b958c03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrackCheckpoints
+  carList:
+  - {fileID: 1463229260047315802}
 --- !u!1001 &1160246896
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -673,6 +688,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 775631098}
     m_Modifications:
+    - target: {fileID: 1500329590549407179, guid: 7d2ef566198fab677a3b569accbe87ce, type: 3}
+      propertyPath: m_Name
+      value: Checkpoint
+      objectReference: {fileID: 0}
     - target: {fileID: 6246803243089135374, guid: 7d2ef566198fab677a3b569accbe87ce, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1397,6 +1416,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Car
       objectReference: {fileID: 0}
+    - target: {fileID: 99702617770072703, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: m_TagString
+      value: Untagged
+      objectReference: {fileID: 0}
     - target: {fileID: 3842110745128777548, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: brakeForce
       value: 9000
@@ -1411,7 +1434,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7721549924900214637, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -5.1
+      value: -13.52
       objectReference: {fileID: 0}
     - target: {fileID: 7721549924900214637, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: m_LocalRotation.w

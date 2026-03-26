@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6249391286204390831}
   - component: {fileID: 6089826459993044508}
+  - component: {fileID: 4703634680057170396}
   m_Layer: 7
   m_Name: Checkpoint
   m_TagString: Checkpoint
@@ -26,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 4760690814732194026}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0.5, z: -6.5}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 0.5, y: 3, z: 15}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -53,6 +54,18 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &4703634680057170396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4760690814732194026}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d20af806e8ee41e2c97a697059606813, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CheckpointSingle
 --- !u!1 &5297804334688477777
 GameObject:
   m_ObjectHideFlags: 0

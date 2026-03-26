@@ -1,7 +1,6 @@
 using UnityEngine;
 
-public class CarCameraController : MonoBehaviour
-{
+public class CarCameraController : MonoBehaviour {
     public Transform target;
     public Vector3 offset;
     public float followSpeed;
