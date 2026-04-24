@@ -16,6 +16,16 @@ public class Track : MonoBehaviour {
             checkpointList[i].SetTrack(this, i);
         }
     }
+    public void AddCheckpoints(CheckpointSingle[] newCheckpoints) {
+        if (checkpointList == null) {
+            checkpointList = new List<CheckpointSingle>();
+        }
+        int startIndex = checkpointList.Count;
+        for (int i = 0; i < newCheckpoints.Length; i++) {
+            newCheckpoints[i].SetTrack(this, startIndex + i);
+            checkpointList.Add(newCheckpoints[i]);
+        }
+    }
 
     public void ResetCheckpoints(Transform car) {
         carCheckpointIndex[car] = 0;
