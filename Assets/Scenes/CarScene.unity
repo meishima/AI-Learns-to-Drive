@@ -347,6 +347,7 @@ MonoBehaviour:
   trackLength: 20
   track: {fileID: 775631099}
   startPrefab: {fileID: 5297804334688477777, guid: 099691d09cfa488afa9a04a8bd445b10, type: 3}
+  trackWidth: 18
 --- !u!4 &986778720
 Transform:
   m_ObjectHideFlags: 0

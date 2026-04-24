@@ -98,49 +98,55 @@ public class TrackGenerator : MonoBehaviour
         return track;
     }
 
+    [Tooltip("The mathematical width of the tracks. Used by the collision algorithm to cast exact footprints.")]
+    public float trackWidth = 14f;
+
     struct Segment {
         public Vector3 a;
         public Vector3 b;
     }
 
-    float ClosestDistanceBetweenSegments(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4) {
-        Vector3 u = p2 - p1;
-        Vector3 v = p4 - p3;
-        Vector3 w = p1 - p3;
-        float a = Vector3.Dot(u, u);
-        float b = Vector3.Dot(u, v);
-        float c = Vector3.Dot(v, v);
-        float d = Vector3.Dot(u, w);
-        float e = Vector3.Dot(v, w);
-        float D = a * c - b * b;
-        float sc, sN, sD = D;
-        float tc, tN, tD = D;
+    bool CheckOBBIntersection(Vector3 a3, Vector3 b3, float w1, Vector3 c3, Vector3 d3, float w2) {
+        Vector2 a = new Vector2(a3.x, a3.z);
+        Vector2 b = new Vector2(b3.x, b3.z);
+        Vector2 c = new Vector2(c3.x, c3.z);
+        Vector2 d = new Vector2(d3.x, d3.z);
 
-        if (D < 0.001f) {
-            sN = 0.0f; sD = 1.0f; tN = e; tD = c;
-        } else {
-            sN = (b * e - c * d);
-            tN = (a * e - b * d);
-            if (sN < 0.0f) { sN = 0.0f; tN = e; tD = c; } 
-            else if (sN > sD) { sN = sD; tN = e + b; tD = c; }
+        Vector2 u1 = (b - a);
+        if (u1.sqrMagnitude < 0.001f) return false;
+        u1.Normalize();
+        Vector2 v1 = new Vector2(-u1.y, u1.x); // Perpendicular
+
+        Vector2 u2 = (d - c);
+        if (u2.sqrMagnitude < 0.001f) return false;
+        u2.Normalize();
+        Vector2 v2 = new Vector2(-u2.y, u2.x);
+
+        // Shrink segments linearly by a micro-interval to eliminate false positives strictly at connected joints
+        a += u1 * 0.1f;
+        b -= u1 * 0.1f;
+        c += u2 * 0.1f;
+        d -= u2 * 0.1f;
+        w1 -= 0.2f;
+        w2 -= 0.2f;
+
+        Vector2[] axes = new Vector2[] { u1, v1, u2, v2 };
+        foreach (Vector2 ax in axes) {
+            float min1 = Mathf.Min(Vector2.Dot(a, ax), Vector2.Dot(b, ax));
+            float max1 = Mathf.Max(Vector2.Dot(a, ax), Vector2.Dot(b, ax));
+            float exp1 = (w1 / 2f) * Mathf.Abs(Vector2.Dot(v1, ax));
+            min1 -= exp1; max1 += exp1;
+
+            float min2 = Mathf.Min(Vector2.Dot(c, ax), Vector2.Dot(d, ax));
+            float max2 = Mathf.Max(Vector2.Dot(c, ax), Vector2.Dot(d, ax));
+            float exp2 = (w2 / 2f) * Mathf.Abs(Vector2.Dot(v2, ax));
+            min2 -= exp2; max2 += exp2;
+
+            if (max1 <= min2 || max2 <= min1) {
+                return false; // Separating axis found! No collision geometrically possible.
+            }
         }
-
-        if (tN < 0.0f) {
-            tN = 0.0f;
-            if (-d < 0.0f) sN = 0.0f;
-            else if (-d > a) sN = sD;
-            else { sN = -d; sD = a; }
-        } else if (tN > tD) {
-            tN = tD;
-            if ((-d + b) < 0.0f) sN = 0.0f;
-            else if ((-d + b) > a) sN = sD;
-            else { sN = (-d + b); sD = a; }
-        }
-
-        sc = (Mathf.Abs(sN) < 0.001f ? 0.0f : sN / sD);
-        tc = (Mathf.Abs(tN) < 0.001f ? 0.0f : tN / tD);
-        Vector3 dP = w + (sc * u) - (tc * v);
-        return dP.magnitude;
+        return true; 
     }
 
     class TrackPool {
@@ -177,6 +183,7 @@ public class TrackGenerator : MonoBehaviour
         foreach (var t in templates.Values) {
             maxPieceLength = Mathf.Max(maxPieceLength, t.exitOffset.magnitude);
         }
+        Time.timeScale = 0f;
         StartCoroutine(TrackGeneratorCoroutine());
     }
 
@@ -309,8 +316,8 @@ public class TrackGenerator : MonoBehaviour
 
                     bool collision = false;
                     for (int j = collisionStartIndex; j < segments.Count - 3; j++) {
-                        if (ClosestDistanceBetweenSegments(segments[j].a, segments[j].b, s1.a, s1.b) < 13f ||
-                            ClosestDistanceBetweenSegments(segments[j].a, segments[j].b, s2.a, s2.b) < 13f) {
+                        if (CheckOBBIntersection(segments[j].a, segments[j].b, trackWidth, s1.a, s1.b, trackWidth) ||
+                            CheckOBBIntersection(segments[j].a, segments[j].b, trackWidth, s2.a, s2.b, trackWidth)) {
                             collision = true;
                             break;
                         }
@@ -351,6 +358,7 @@ public class TrackGenerator : MonoBehaviour
         foreach (var def in path) {
             SpawnPiece(def, ref isFirst);
         }
+        Time.timeScale = 1f;
     }
 
     void SpawnPiece(PieceDef def, ref bool isFirst) {
