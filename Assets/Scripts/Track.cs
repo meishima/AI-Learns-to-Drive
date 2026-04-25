@@ -27,6 +27,11 @@ public class Track : MonoBehaviour {
         }
     }
 
+    public void ClearCheckpoints() {
+        if (checkpointList != null) checkpointList.Clear();
+        carCheckpointIndex.Clear();
+    }
+
     public void ResetCheckpoints(Transform car) {
         carCheckpointIndex[car] = 0;
     }

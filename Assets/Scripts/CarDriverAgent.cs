@@ -42,6 +42,13 @@ public class CarDriverAgent : Agent {
     }
 
     public override void CollectObservations(VectorSensor sensor) {
+        if (rb != null && rb.isKinematic) {
+            sensor.AddObservation(Vector3.forward);
+            sensor.AddObservation(Vector3.forward);
+            sensor.AddObservation(0f);
+            return;
+        }
+
         Transform nextCheckpoint = track.GetNextCheckpoint(transform);
         Vector3 dirToCheckpoint = (nextCheckpoint.position - transform.position).normalized;
 
@@ -51,6 +58,8 @@ public class CarDriverAgent : Agent {
     }
 
     public override void OnActionReceived(ActionBuffers actions) {
+        if (rb != null && rb.isKinematic) return;
+
         float horizontalInput = 0f;
         float verticalInput = 0f;
         bool isBraking = false;
@@ -72,19 +81,25 @@ public class CarDriverAgent : Agent {
 
         Transform nextCheckpoint = track.GetNextCheckpoint(transform);
         Vector3 dirToCheckpoint = (nextCheckpoint.position - transform.position).normalized;
-        float directionLookAlignment = Vector3.Dot(transform.forward, dirToCheckpoint);
-        float velocityAlignment = Vector3.Dot(rb.linearVelocity.normalized, dirToCheckpoint);
         
-        if (directionLookAlignment > 0 && velocityAlignment > 0) {
-            AddReward(velocityAlignment * 0.01f);
-        }else {
-            AddReward(-0.01f);
+        // Calculate raw velocity heading towards the target explicitly
+        float speedTowardsCheckpoint = Vector3.Dot(rb.linearVelocity, dirToCheckpoint);
+        
+        if (speedTowardsCheckpoint > 0.5f) {
+            // Provide continuous dense reward for actively moving towards the next checkpoint
+            AddReward(speedTowardsCheckpoint * 0.002f);
+        } else if (speedTowardsCheckpoint < -0.1f) {
+            // Punish driving backwards explicitly
+            AddReward(-0.002f);
         }
 
-        AddReward(-0.001f);
+        // A very tiny time penalty to encourage urgency, but deliberately small so the accumulated episode sum isn't worse than full-force Crashing!
+        AddReward(-0.0002f);
     }
 
     public override void Heuristic(in ActionBuffers actionsOut) {
+        if (rb != null && rb.isKinematic) return;
+
         var discreteActions = actionsOut.DiscreteActions;
 
         if (Input.GetKey(KeyCode.W)) discreteActions[0] = 1;
@@ -100,7 +115,31 @@ public class CarDriverAgent : Agent {
     private void OnTriggerEnter(Collider collision) {
         if (collision.CompareTag("Wall")) {
             AddReward(-1.5f);
-            EndEpisode();
+            
+            MapRotator rotator = Object.FindAnyObjectByType<MapRotator>();
+            if (rotator != null) {
+                // Freeze exclusively to avoid ML-Agent OnDisable hierarchy warnings!
+                if (rb != null) {
+                    if (!rb.isKinematic) {
+                        rb.linearVelocity = Vector3.zero;
+                        rb.angularVelocity = Vector3.zero;
+                    }
+                    rb.isKinematic = true;
+                }
+
+                // Optionally drop them out of the sky conceptually to clear the active visual track area invisibly
+                transform.position = new Vector3(0, -9000, 0); 
+            } else {
+                // Completely standalone testing loop: Autonomously queue the Track rebuild since there is no Supervisor script!
+                gameObject.SetActive(false);
+                TrackGenerator generator = Object.FindAnyObjectByType<TrackGenerator>();
+                if (generator != null) {
+                    generator.ClearTrack();
+                    generator.GenerateComplexTrack();
+                } else {
+                    EndEpisode(); // Barebones generic respawn
+                }
+            }
         }
     }
 
