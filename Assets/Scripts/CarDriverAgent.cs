@@ -5,14 +5,26 @@ using UnityEngine;
 
 public class CarDriverAgent : Agent {
     [SerializeField] private Track track;
-    [SerializeField] private Transform spawnPosition;
 
     private CarController carController;
     private Rigidbody rb;
 
+    private int myIndex = -1;
+    private TrackGenerator trackGenerator;
+
     public override void Initialize() {
         carController = GetComponent<CarController>();
         rb = GetComponent<Rigidbody>();
+        trackGenerator = Object.FindAnyObjectByType<TrackGenerator>();
+
+        CarDriverAgent[] allAgents = Object.FindObjectsByType<CarDriverAgent>(FindObjectsInactive.Include);
+        System.Array.Sort(allAgents, (a, b) => a.transform.GetSiblingIndex().CompareTo(b.transform.GetSiblingIndex()));
+        
+        myIndex = System.Array.IndexOf(allAgents, this);
+        
+        if (myIndex == 0 && allAgents.Length > 8) {
+            Debug.LogError("More than 8 cars detected! We will implement that later.");
+        }
     }
 
     private void Start() {
@@ -35,8 +47,19 @@ public class CarDriverAgent : Agent {
     }
 
     public override void OnEpisodeBegin() {
-        transform.position = spawnPosition.position + new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f));
-        transform.forward = spawnPosition.forward;
+        int row = myIndex / 2;
+        int col = myIndex % 2;
+
+        float offsetX = (col == 0) ? -2.5f : 2.5f;
+        // Shift the entire grid slightly backwards from the ExitPoint so the front row isn't exactly on the line
+        float offsetZ = -4f - (row * 6f);
+
+        Vector3 localOffset = new Vector3(offsetX, 0, offsetZ);
+        
+        Transform spawnRef = trackGenerator != null ? trackGenerator.GetSpawnTransform() : transform;
+
+        transform.position = spawnRef.position + spawnRef.TransformDirection(localOffset);
+        transform.forward = spawnRef.forward;
         track.ResetCheckpoints(transform);
         carController.StopCompletely();
     }
@@ -128,7 +151,7 @@ public class CarDriverAgent : Agent {
                 }
 
                 // Optionally drop them out of the sky conceptually to clear the active visual track area invisibly
-                transform.position = new Vector3(0, -9000, 0); 
+                transform.position = new Vector3(0, 20, 0); 
             } else {
                 // Completely standalone testing loop: Autonomously queue the Track rebuild since there is no Supervisor script!
                 gameObject.SetActive(false);

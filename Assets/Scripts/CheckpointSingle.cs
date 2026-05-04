@@ -10,6 +10,7 @@ public class CheckpointSingle : MonoBehaviour {
     }
     
     private void OnTriggerEnter(Collider collider) {
+        if (track == null) return;
         if (collider.TryGetComponent<CarDriverAgent>(out CarDriverAgent car)) {
             track.CarThroughCheckpoint(index, car.transform);
         }

@@ -93,6 +93,8 @@ public class TrackGenerator : MonoBehaviour
 
     void ExtractTemplate(GameObject prefab, bool isRightTurn) {
         GameObject tmp = Instantiate(prefab, Vector3.zero, Quaternion.identity);
+        tmp.hideFlags = HideFlags.HideAndDontSave;
+        tmp.SetActive(false);
         tmp.transform.localScale = isRightTurn ? new Vector3(-1, 1, 1) : Vector3.one;
 
         Transform sPt = tmp.transform.Find("StartPoint");
@@ -115,7 +117,7 @@ public class TrackGenerator : MonoBehaviour
 
         PieceDef def = new PieceDef { prefab = prefab, isRightTurn = isRightTurn };
         templates[def] = tmpl;
-        Destroy(tmp);
+        DestroyImmediate(tmp);
     }
 
     private float maxPieceLength = 0f;
@@ -227,6 +229,18 @@ public class TrackGenerator : MonoBehaviour
         activePieces.Clear();
     }
 
+    public Transform GetSpawnTransform() {
+        if (activePieces.Count > 0 && activePieces[0] != null) {
+            if (activePieces[0].transform.childCount > 0) {
+                Transform firstPiece = activePieces[0].transform.GetChild(0);
+                Transform exitPt = firstPiece.Find("ExitPoint");
+                if (exitPt != null) return exitPt;
+                return firstPiece;
+            }
+        }
+        return transform;
+    }
+
     public int maxPreloadedTracks = 3;
     private Queue<GameObject> prebuiltTracks = new Queue<GameObject>();
     private bool isBuildingTrack = false;
@@ -299,11 +313,16 @@ public class TrackGenerator : MonoBehaviour
             pools = pools.OrderBy(x => Random.value).ToList();
 
             foreach (var pool in pools) {
+                GameObject straightObj = straightPrefabs.FirstOrDefault(p => p.name.Contains("Long")) ?? straightPrefabs[0];
+                PieceDef straightDef = new PieceDef { prefab = straightObj, isRightTurn = false };
                 PieceDef startDef = new PieceDef { prefab = startPrefab != null ? startPrefab : straightPrefabs[0], isRightTurn = false };
                 
                 int startS = pool.s;
                 int startL = pool.l;
                 int startR = pool.r;
+
+                if (!turnPrefabs.Contains(straightDef.prefab)) startS--;
+                else startL--; 
 
                 if (!turnPrefabs.Contains(startDef.prefab)) startS--;
                 else startL--; 
@@ -312,18 +331,27 @@ public class TrackGenerator : MonoBehaviour
 
                 path.Clear();
                 segments.Clear();
+                path.Add(straightDef);
                 path.Add(startDef);
 
-                PieceTemplate t = templates[startDef];
-                Vector3 nextPos = t.exitOffset;
-                float nextRotAngle = t.exitAngle;
-                
-                segments.Add(new Segment { a = Vector3.zero, b = nextPos * 0.5f });
-                segments.Add(new Segment { a = nextPos * 0.5f, b = nextPos });
+                PieceTemplate t1 = templates[straightDef];
+                Vector3 pos1 = t1.exitOffset;
+                float rot1 = t1.exitAngle;
+
+                segments.Add(new Segment { a = Vector3.zero, b = pos1 * 0.5f });
+                segments.Add(new Segment { a = pos1 * 0.5f, b = pos1 });
+
+                PieceTemplate t2 = templates[startDef];
+                Quaternion r1 = Quaternion.Euler(0, rot1, 0);
+                Vector3 pos2 = pos1 + r1 * t2.exitOffset;
+                float rot2 = rot1 + t2.exitAngle;
+
+                segments.Add(new Segment { a = pos1, b = (pos1 + pos2) * 0.5f });
+                segments.Add(new Segment { a = (pos1 + pos2) * 0.5f, b = pos2 });
 
                 Stack<DFSState> stack = new Stack<DFSState>();
                 stack.Push(new DFSState { 
-                    pos = nextPos, rotAngle = nextRotAngle, 
+                    pos = pos2, rotAngle = rot2, 
                     s = startS, l = startL, r = startR, 
                     availableChoices = GetChoices(startS, startL, startR), 
                     choiceIndex = 0 
@@ -366,7 +394,7 @@ public class TrackGenerator : MonoBehaviour
                         int piecesLeft = curr.s + curr.l + curr.r;
                         if (piecesLeft == 0 || dist > piecesLeft * maxPieceLength) {
                             stack.Pop();
-                            if (path.Count > stack.Count) {
+                            if (path.Count > stack.Count + 1) {
                                 path.RemoveAt(path.Count - 1);
                                 segments.RemoveAt(segments.Count - 1);
                                 segments.RemoveAt(segments.Count - 1);
@@ -379,7 +407,7 @@ public class TrackGenerator : MonoBehaviour
                         stack.Pop();
                         localBacktracks++; 
 
-                        if (path.Count > stack.Count) {
+                        if (path.Count > stack.Count + 1) {
                             path.RemoveAt(path.Count - 1);
                             segments.RemoveAt(segments.Count - 1);
                             segments.RemoveAt(segments.Count - 1);
@@ -441,8 +469,10 @@ public class TrackGenerator : MonoBehaviour
         if (!found) {
             Debug.LogWarning("Exhausted all pathing possibilities; generating fallback rectangle track.");
             path = CreateFallbackTrack(targetTrackLength);
-            if (startPrefab != null && path.Count > 0) {
-                path[0] = new PieceDef { prefab = startPrefab, isRightTurn = false };
+            if (startPrefab != null && path.Count > 1) {
+                GameObject straightObj = straightPrefabs.FirstOrDefault(p => p.name.Contains("Long")) ?? straightPrefabs[0];
+                path[0] = new PieceDef { prefab = straightObj, isRightTurn = false };
+                path[1] = new PieceDef { prefab = startPrefab, isRightTurn = false };
             }
         }
 
@@ -467,8 +497,7 @@ public class TrackGenerator : MonoBehaviour
     }
 
     void SpawnPieceAsync(PieceDef def, GameObject root, ref bool isFirst) {
-        GameObject spawned = Instantiate(def.prefab, Vector3.zero, Quaternion.identity);
-        spawned.transform.SetParent(root.transform);
+        GameObject spawned = Instantiate(def.prefab, Vector3.zero, Quaternion.identity, root.transform);
         
         spawned.transform.localScale = def.isRightTurn ? new Vector3(-1, 1, 1) : Vector3.one;
 
