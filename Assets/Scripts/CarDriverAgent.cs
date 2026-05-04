@@ -23,38 +23,38 @@ public class CarDriverAgent : Agent {
         
         myIndex = System.Array.IndexOf(allAgents, this);
         
-        if (myIndex == 0 && allAgents.Length > 8) {
-            Debug.LogError("More than 8 cars detected! We will implement that later.");
+        if (myIndex == 0 && allAgents.Length > 16) {
+            Debug.LogWarning("More than 16 cars detected! They might spill off the runway.");
         }
     }
 
     private void Start() {
         track.OnCarCorrectCheckpoint += (car) => {
             if (car == transform) {
-                AddReward(1f);
+                AddReward(5f); // Made checkpoints extremely valuable so they prioritize track position
             }
         };
         track.OnCarWrongCheckpoint += (car) => {
             if (car == transform) {
-                AddReward(-1f);
+                AddReward(-2f);
             }
         };
 
         track.OnLapCompleted += (car) => {
             if (car == transform) {
-                AddReward(10f);
+                AddReward(20f);
             }
         };
     }
 
     public override void OnEpisodeBegin() {
-        int row = myIndex / 2;
-        int col = myIndex % 2;
+        int row = myIndex / 4;
+        int col = myIndex % 4;
 
         float scaleMult = (trackGenerator != null) ? trackGenerator.globalScaleMultiplier : 1f;
 
-        // Fixed lane width
-        float offsetX = (col == 0) ? -3f : 3f; 
+        // 4 lanes to support 16 cars side-by-side cleanly
+        float offsetX = (-4.5f + (col * 3f)) * scaleMult; 
         
         // Pin the front row just behind the start line, and space them backwards by exactly 5.5 units for a tight, realistic grid
         float startZ = (15f * scaleMult) - 3f; 
@@ -117,15 +117,15 @@ public class CarDriverAgent : Agent {
         float speedTowardsCheckpoint = Vector3.Dot(rb.linearVelocity, dirToCheckpoint);
         
         if (speedTowardsCheckpoint > 0.5f) {
-            // Provide continuous dense reward for actively moving towards the next checkpoint
-            AddReward(speedTowardsCheckpoint * 0.002f);
+            // Reduced slightly so it doesn't completely mathematically overshadow the crash penalties!
+            AddReward(speedTowardsCheckpoint * 0.005f);
         } else if (speedTowardsCheckpoint < -0.1f) {
             // Punish driving backwards explicitly
-            AddReward(-0.002f);
+            AddReward(-0.01f);
         }
 
-        // A very tiny time penalty to encourage urgency, but deliberately small so the accumulated episode sum isn't worse than full-force Crashing!
-        AddReward(-0.0002f);
+        // Increased time penalty to actively force urgency
+        AddReward(-0.001f);
     }
 
     public override void Heuristic(in ActionBuffers actionsOut) {
@@ -145,7 +145,7 @@ public class CarDriverAgent : Agent {
 
     private void OnTriggerEnter(Collider collision) {
         if (collision.CompareTag("Wall")) {
-            AddReward(-0.2f); // Significantly reduced to encourage exploration!
+            AddReward(-2f); 
             
             MapRotator rotator = Object.FindAnyObjectByType<MapRotator>();
             if (rotator != null) {
@@ -177,7 +177,7 @@ public class CarDriverAgent : Agent {
     private void OnCollisionEnter(Collision collision) {
         // Punish cars for physically crashing into each other so they learn to race cleanly
         if (collision.gameObject.CompareTag("Car")) {
-            AddReward(-1.0f); // Severe punishment for crashing into other cars
+            AddReward(-10f); // Massive punishment to force them to respect other cars
         }
     }
 

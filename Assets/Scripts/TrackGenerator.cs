@@ -487,8 +487,15 @@ public class TrackGenerator : MonoBehaviour
         lastExitPoint = trackRoot.transform; // seed rotation point
         bool isFirst = true;
         
+        int spawnCount = 0;
         foreach (var def in path) {
             SpawnPieceAsync(def, trackRoot, ref isFirst);
+            
+            // Yield every 3 pieces to prevent a single-frame instantiation spike
+            spawnCount++;
+            if (spawnCount % 3 == 0) {
+                yield return null;
+            }
         }
         
         if (activateImmediately) {

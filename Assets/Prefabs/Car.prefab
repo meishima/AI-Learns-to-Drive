@@ -12,7 +12,11 @@ GameObject:
   - component: {fileID: 1573439593700988254}
   - component: {fileID: 8264139605363247723}
   - component: {fileID: 3842110745128777548}
-  m_Layer: 0
+  - component: {fileID: 985074270236088301}
+  - component: {fileID: 428437554216796419}
+  - component: {fileID: 4127123482292289423}
+  - component: {fileID: 5133574725008494974}
+  m_Layer: 8
   m_Name: Car
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -112,8 +116,87 @@ MonoBehaviour:
     axel: 0
   maxSteerAngle: 30
   motorForce: 10000
-  brakeForce: 7500
+  brakeForce: 9000
   turnSpeed: 150
+--- !u!114 &985074270236088301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 99702617770072703}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d1c4e0b1822b495aa52bc52839ecb30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Policies.BehaviorParameters
+  m_BrainParameters:
+    VectorObservationSize: 7
+    NumStackedVectorObservations: 1
+    m_ActionSpec:
+      m_NumContinuousActions: 0
+      BranchSizes: 030000000300000002000000
+    VectorActionSize: 030000000300000002000000
+    VectorActionDescriptions: []
+    VectorActionSpaceType: 0
+    hasUpgradedBrainParametersWithActionSpec: 1
+  m_Model: {fileID: 5022602860645237092, guid: 9688696af9c4c4783b3af032165457d7, type: 3}
+  m_InferenceDevice: 0
+  m_BehaviorType: 0
+  m_BehaviorName: CarDriverAgent
+  TeamId: 0
+  m_UseChildSensors: 1
+  m_UseChildActuators: 1
+  m_DeterministicInference: 0
+  m_ObservableAttributeHandling: 0
+--- !u!114 &428437554216796419
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 99702617770072703}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c9f848c30d1bff15b4857fa5589b7fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CarDriverAgent
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 100000
+  track: {fileID: 0}
+--- !u!114 &4127123482292289423
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 99702617770072703}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a5c9d521e5ef4759a8246a07d52221e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.DecisionRequester
+  DecisionPeriod: 5
+  DecisionStep: 0
+  TakeActionsBetweenDecisions: 1
+--- !u!114 &5133574725008494974
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 99702617770072703}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88b6042bc9a5d4aa58d931eae49442e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Agent
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
 --- !u!1 &513867804254250503
 GameObject:
   m_ObjectHideFlags: 0
@@ -124,7 +207,7 @@ GameObject:
   m_Component:
   - component: {fileID: 309724319775323714}
   - component: {fileID: 3470649001915483517}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: FL_Tire Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -196,7 +279,7 @@ GameObject:
   - component: {fileID: 8613400263612259462}
   - component: {fileID: 2227062978410724674}
   - component: {fileID: 589941312712650896}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: FR_Tire
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -288,7 +371,7 @@ GameObject:
   - component: {fileID: 5995379055528820162}
   - component: {fileID: 306323365198636657}
   - component: {fileID: 325607254208353773}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: BL_Tire
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -379,7 +462,7 @@ GameObject:
   m_Component:
   - component: {fileID: 352619988764720762}
   - component: {fileID: 7915222645964223511}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: FR_Tire Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -451,7 +534,7 @@ GameObject:
   - component: {fileID: 5651376995639607609}
   - component: {fileID: 7298327263927897862}
   - component: {fileID: 6304448179261605352}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -544,7 +627,7 @@ GameObject:
   - component: {fileID: 8563293512500733988}
   - component: {fileID: 4426248114420444854}
   - component: {fileID: 3648488084060443820}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: FL_Tire
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -635,7 +718,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7012461112909341651}
   - component: {fileID: 3807180850474932514}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: BR_Tire Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -705,7 +788,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6789505571623404607}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: WheelColliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -740,7 +823,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6845359828137821196}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Wheels
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -777,7 +860,7 @@ GameObject:
   - component: {fileID: 4667507800745033645}
   - component: {fileID: 2699900200700600712}
   - component: {fileID: 8501391282892960657}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: BR_Tire
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -868,7 +951,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3565001680242676252}
   - component: {fileID: 2883355355633699422}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: BL_Tire Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
