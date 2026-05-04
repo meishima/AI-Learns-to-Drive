@@ -12,6 +12,9 @@ public class TrackGenerator : MonoBehaviour
     public int minRandomLength = 10;
     public int maxRandomLength = 30;
 
+    [Tooltip("Scales the entire generated track physically to make roads wider and longer.")]
+    public float globalScaleMultiplier = 1f;
+
     public Track track;
     
     private Transform lastExitPoint;
@@ -233,8 +236,8 @@ public class TrackGenerator : MonoBehaviour
         if (activePieces.Count > 0 && activePieces[0] != null) {
             if (activePieces[0].transform.childCount > 0) {
                 Transform firstPiece = activePieces[0].transform.GetChild(0);
-                Transform exitPt = firstPiece.Find("ExitPoint");
-                if (exitPt != null) return exitPt;
+                Transform startPt = firstPiece.Find("StartPoint");
+                if (startPt != null) return startPt;
                 return firstPiece;
             }
         }
@@ -478,6 +481,7 @@ public class TrackGenerator : MonoBehaviour
 
         GameObject trackRoot = new GameObject("PrebuiltTrackRoot");
         trackRoot.transform.SetParent(track != null ? track.transform : transform);
+        trackRoot.transform.localScale = Vector3.one * globalScaleMultiplier;
         trackRoot.SetActive(false); // keep invisible during buffer
         
         lastExitPoint = trackRoot.transform; // seed rotation point

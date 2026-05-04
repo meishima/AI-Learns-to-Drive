@@ -16,6 +16,7 @@ public class CarDriverAgent : Agent {
         carController = GetComponent<CarController>();
         rb = GetComponent<Rigidbody>();
         trackGenerator = Object.FindAnyObjectByType<TrackGenerator>();
+        if (track == null) track = Object.FindAnyObjectByType<Track>();
 
         CarDriverAgent[] allAgents = Object.FindObjectsByType<CarDriverAgent>(FindObjectsInactive.Include);
         System.Array.Sort(allAgents, (a, b) => a.transform.GetSiblingIndex().CompareTo(b.transform.GetSiblingIndex()));
@@ -50,9 +51,16 @@ public class CarDriverAgent : Agent {
         int row = myIndex / 2;
         int col = myIndex % 2;
 
-        float offsetX = (col == 0) ? -2.5f : 2.5f;
-        // Shift the entire grid slightly backwards from the ExitPoint so the front row isn't exactly on the line
-        float offsetZ = -4f - (row * 6f);
+        float scaleMult = (trackGenerator != null) ? trackGenerator.globalScaleMultiplier : 1f;
+
+        // Fixed lane width
+        float offsetX = (col == 0) ? -3f : 3f; 
+        
+        // Pin the front row just behind the start line, and space them backwards by exactly 5.5 units for a tight, realistic grid
+        float startZ = (15f * scaleMult) - 3f; 
+        float spacingZ = 5.5f; 
+        
+        float offsetZ = startZ - (row * spacingZ);
 
         Vector3 localOffset = new Vector3(offsetX, 0, offsetZ);
         
@@ -137,7 +145,7 @@ public class CarDriverAgent : Agent {
 
     private void OnTriggerEnter(Collider collision) {
         if (collision.CompareTag("Wall")) {
-            AddReward(-1.5f);
+            AddReward(-0.2f); // Significantly reduced to encourage exploration!
             
             MapRotator rotator = Object.FindAnyObjectByType<MapRotator>();
             if (rotator != null) {
@@ -163,6 +171,13 @@ public class CarDriverAgent : Agent {
                     EndEpisode(); // Barebones generic respawn
                 }
             }
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision) {
+        // Punish cars for physically crashing into each other so they learn to race cleanly
+        if (collision.gameObject.CompareTag("Car")) {
+            AddReward(-1.0f); // Severe punishment for crashing into other cars
         }
     }
 

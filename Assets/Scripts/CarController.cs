@@ -103,8 +103,7 @@ public class CarController : MonoBehaviour {
     }
 
     private void Start() {
-        int carLayer = LayerMask.NameToLayer("Car");
-        Physics.IgnoreLayerCollision(carLayer, carLayer, true);
+        // Removed hardcoded Physics.IgnoreLayerCollision to allow multi-agent collisions!
     }
 
     private void LogSpeed() {
