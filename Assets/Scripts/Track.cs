@@ -53,6 +53,16 @@ public class Track : MonoBehaviour {
         return checkpointList[index].transform;
     }
 
+    /// <summary>Returns the number of checkpoints on the current track.</summary>
+    public int GetCheckpointCount() {
+        return checkpointList != null ? checkpointList.Count : 0;
+    }
+
+    /// <summary>Returns this car's current checkpoint index (0 = just started, Count-1 = about to finish a lap).</summary>
+    public int GetCheckpointIndex(Transform car) {
+        return carCheckpointIndex.TryGetValue(car, out int idx) ? idx : 0;
+    }
+
     public void CarThroughCheckpoint(int checkpointIndex, Transform car) {
         if (!carCheckpointIndex.TryGetValue(car, out int expectedIndex)) return;
 

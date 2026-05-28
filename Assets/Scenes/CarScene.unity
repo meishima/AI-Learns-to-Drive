@@ -140,6 +140,10 @@ PrefabInstance:
       value: Car
       objectReference: {fileID: 0}
     - target: {fileID: 428437554216796419, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: team
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 428437554216796419, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: track
       value: 
       objectReference: {fileID: 775631099}
@@ -155,6 +159,10 @@ PrefabInstance:
       propertyPath: m_Model
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 9688696af9c4c4783b3af032165457d7, type: 3}
+    - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: m_BehaviorName
+      value: CarDriverAgent_Alpha
+      objectReference: {fileID: 0}
     - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 2
@@ -336,6 +344,10 @@ PrefabInstance:
       value: Car
       objectReference: {fileID: 0}
     - target: {fileID: 428437554216796419, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: team
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 428437554216796419, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: track
       value: 
       objectReference: {fileID: 775631099}
@@ -351,6 +363,10 @@ PrefabInstance:
       propertyPath: m_Model
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 9688696af9c4c4783b3af032165457d7, type: 3}
+    - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: m_BehaviorName
+      value: CarDriverAgent_Beta
+      objectReference: {fileID: 0}
     - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 2
@@ -680,6 +696,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 9688696af9c4c4783b3af032165457d7, type: 3}
     - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: m_BehaviorName
+      value: CarDriverAgent_Alpha
+      objectReference: {fileID: 0}
+    - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 2
       objectReference: {fileID: 0}
@@ -860,6 +880,10 @@ PrefabInstance:
       value: Car
       objectReference: {fileID: 0}
     - target: {fileID: 428437554216796419, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: team
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 428437554216796419, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: track
       value: 
       objectReference: {fileID: 775631099}
@@ -875,6 +899,10 @@ PrefabInstance:
       propertyPath: m_Model
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 9688696af9c4c4783b3af032165457d7, type: 3}
+    - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: m_BehaviorName
+      value: CarDriverAgent_Beta
+      objectReference: {fileID: 0}
     - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 2
@@ -1004,6 +1032,10 @@ PrefabInstance:
       value: Car
       objectReference: {fileID: 0}
     - target: {fileID: 428437554216796419, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: team
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 428437554216796419, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: track
       value: 
       objectReference: {fileID: 775631099}
@@ -1019,6 +1051,10 @@ PrefabInstance:
       propertyPath: m_Model
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 9688696af9c4c4783b3af032165457d7, type: 3}
+    - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: m_BehaviorName
+      value: CarDriverAgent_Beta
+      objectReference: {fileID: 0}
     - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 2
@@ -1215,6 +1251,10 @@ PrefabInstance:
       propertyPath: m_Model
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 9688696af9c4c4783b3af032165457d7, type: 3}
+    - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: m_BehaviorName
+      value: CarDriverAgent_Alpha
+      objectReference: {fileID: 0}
     - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 2
@@ -1464,6 +1504,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 9688696af9c4c4783b3af032165457d7, type: 3}
     - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: m_BehaviorName
+      value: CarDriverAgent_Alpha
+      objectReference: {fileID: 0}
+    - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 2
       objectReference: {fileID: 0}
@@ -1659,6 +1703,10 @@ PrefabInstance:
       propertyPath: m_Model
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 9688696af9c4c4783b3af032165457d7, type: 3}
+    - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: m_BehaviorName
+      value: CarDriverAgent_Alpha
+      objectReference: {fileID: 0}
     - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 2
@@ -1936,6 +1984,10 @@ PrefabInstance:
       value: Car
       objectReference: {fileID: 0}
     - target: {fileID: 428437554216796419, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: team
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 428437554216796419, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: track
       value: 
       objectReference: {fileID: 775631099}
@@ -1951,6 +2003,10 @@ PrefabInstance:
       propertyPath: m_Model
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 9688696af9c4c4783b3af032165457d7, type: 3}
+    - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: m_BehaviorName
+      value: CarDriverAgent_Beta
+      objectReference: {fileID: 0}
     - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 2
@@ -2080,6 +2136,10 @@ PrefabInstance:
       value: Car
       objectReference: {fileID: 0}
     - target: {fileID: 428437554216796419, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: team
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 428437554216796419, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: track
       value: 
       objectReference: {fileID: 775631099}
@@ -2095,6 +2155,10 @@ PrefabInstance:
       propertyPath: m_Model
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 9688696af9c4c4783b3af032165457d7, type: 3}
+    - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: m_BehaviorName
+      value: CarDriverAgent_Beta
+      objectReference: {fileID: 0}
     - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 2
@@ -2363,6 +2427,10 @@ PrefabInstance:
       propertyPath: m_Model
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 9688696af9c4c4783b3af032165457d7, type: 3}
+    - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: m_BehaviorName
+      value: CarDriverAgent_Alpha
+      objectReference: {fileID: 0}
     - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 2
@@ -2802,6 +2870,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 9688696af9c4c4783b3af032165457d7, type: 3}
     - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: m_BehaviorName
+      value: CarDriverAgent_Alpha
+      objectReference: {fileID: 0}
+    - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 2
       objectReference: {fileID: 0}
@@ -3114,6 +3186,10 @@ PrefabInstance:
       value: Car
       objectReference: {fileID: 0}
     - target: {fileID: 428437554216796419, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: team
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 428437554216796419, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: track
       value: 
       objectReference: {fileID: 775631099}
@@ -3129,6 +3205,10 @@ PrefabInstance:
       propertyPath: m_Model
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 9688696af9c4c4783b3af032165457d7, type: 3}
+    - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: m_BehaviorName
+      value: CarDriverAgent_Beta
+      objectReference: {fileID: 0}
     - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 2
@@ -4057,6 +4137,10 @@ PrefabInstance:
       value: Car
       objectReference: {fileID: 0}
     - target: {fileID: 428437554216796419, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: team
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 428437554216796419, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: track
       value: 
       objectReference: {fileID: 775631099}
@@ -4072,6 +4156,10 @@ PrefabInstance:
       propertyPath: m_Model
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 9688696af9c4c4783b3af032165457d7, type: 3}
+    - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: m_BehaviorName
+      value: CarDriverAgent_Beta
+      objectReference: {fileID: 0}
     - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 2
@@ -4434,6 +4522,10 @@ PrefabInstance:
       value: Car
       objectReference: {fileID: 0}
     - target: {fileID: 428437554216796419, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: team
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 428437554216796419, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: track
       value: 
       objectReference: {fileID: 775631099}
@@ -4449,6 +4541,10 @@ PrefabInstance:
       propertyPath: m_Model
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 9688696af9c4c4783b3af032165457d7, type: 3}
+    - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: m_BehaviorName
+      value: CarDriverAgent_Beta
+      objectReference: {fileID: 0}
     - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 2
@@ -4645,6 +4741,10 @@ PrefabInstance:
       propertyPath: m_Model
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 9688696af9c4c4783b3af032165457d7, type: 3}
+    - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
+      propertyPath: m_BehaviorName
+      value: CarDriverAgent_Alpha
+      objectReference: {fileID: 0}
     - target: {fileID: 985074270236088301, guid: dc3419d24170615ddb496103ae73e423, type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 2

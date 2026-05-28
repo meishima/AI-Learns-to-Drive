@@ -68,6 +68,9 @@ public class TrackGenerator : MonoBehaviour
     }
 
     void Start() {
+        Application.targetFrameRate = 0;    // Uncapped — run as fast as possible
+        QualitySettings.vSyncCount = 0;     // Don't lock to monitor refresh rate
+        QualitySettings.SetQualityLevel(0, true); // Force lowest quality: no shadows, no AA, minimal overdraw
         // Automatically inject fallback map generation if testing without the MapRotator ML loop!
         if (Object.FindAnyObjectByType<MapRotator>() == null) {
             
@@ -244,7 +247,7 @@ public class TrackGenerator : MonoBehaviour
         return transform;
     }
 
-    public int maxPreloadedTracks = 3;
+    public int maxPreloadedTracks = 2; // 2 is enough buffer; more means more constant background CPU
     private Queue<GameObject> prebuiltTracks = new Queue<GameObject>();
     private bool isBuildingTrack = false;
 
@@ -276,6 +279,10 @@ public class TrackGenerator : MonoBehaviour
 
     System.Collections.IEnumerator TrackGeneratorAsync(bool activateImmediately) {
         isBuildingTrack = true;
+
+        // Urgent builds (queue was empty, agents are waiting) get more CPU per frame.
+        // Background prebuilds use a tiny budget so they don't eat into the render thread.
+        int frameBudgetMs = activateImmediately ? 10 : 3;
         
         foreach (var t in templates.Values) {
             maxPieceLength = Mathf.Max(maxPieceLength, t.exitOffset.magnitude);
@@ -300,7 +307,7 @@ public class TrackGenerator : MonoBehaviour
 
         int nodesEvaluated = 0;
 
-        while (!found && targetLength <= targetTrackLength + 60) {
+        while (!found && targetLength <= targetTrackLength + 20) { // +20 keeps search tractable
             List<TrackPool> pools = new List<TrackPool>();
             for (int r = 0; r <= targetLength; r++) {
                 int l = r + 4;
@@ -367,12 +374,12 @@ public class TrackGenerator : MonoBehaviour
                     nodesEvaluated++;
 
                     // Seamless dynamic frame-budget yielding!
-                    if (frameSw.ElapsedMilliseconds > 8) {
+                    if (frameSw.ElapsedMilliseconds > frameBudgetMs) {
                         yield return null;
                         frameSw.Restart();
                     }
 
-                    if (globalSw.ElapsedMilliseconds > 3000) {
+                    if (globalSw.ElapsedMilliseconds > 8000) {
                         Debug.LogWarning("Track evaluation hit global asynchronous thermal timeout. Forcing standard fallback.");
                         break;
                     }
@@ -459,12 +466,12 @@ public class TrackGenerator : MonoBehaviour
 
                 if (found) break; // Terminate Pool Search
                 
-                if (globalSw.ElapsedMilliseconds > 3000) break;
+                if (globalSw.ElapsedMilliseconds > 8000) break;
             }
 
             if (found) break; // Terminate Track Length Iteration
             
-            if (globalSw.ElapsedMilliseconds > 3000) break;
+            if (globalSw.ElapsedMilliseconds > 8000) break;
             
             targetLength += 2;
         }
