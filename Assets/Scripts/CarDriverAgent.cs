@@ -25,14 +25,19 @@ public class CarDriverAgent : Agent {
     //   overtakes. Barely slows for anything.
     // ─────────────────────────────────────────────────────────
     private const float ALPHA_CHECKPOINT_REWARD  =  3.0f;
-    private const float ALPHA_WRONG_CHECKPOINT   = -0.5f;  // barely cares
+    private const float ALPHA_WRONG_CHECKPOINT   = -2.0f;  // strong deterrent for wrong direction
     private const float ALPHA_LAP_REWARD         = 30.0f;
-    private const float ALPHA_WALL_PENALTY       = -0.5f;  // wall scrapes = acceptable
-    private const float ALPHA_CAR_COLLISION      = -2.0f;  // bumper-car mentality
-    private const float ALPHA_SPEED_SCALE        =  0.012f;// big per-step speed hunger
-    private const float ALPHA_REVERSE_PENALTY    = -0.01f; // mild — just turn around and go
-    private const float ALPHA_TIME_PENALTY       = -0.0003f;
-    private const float ALPHA_OVERTAKE_REWARD    = 10.0f;  // overtaking is the whole game
+    private const float ALPHA_WALL_PENALTY       = -25.0f; // raised at 2M steps — agents know to drive, walls now heavily punished
+    private const float ALPHA_CAR_COLLISION      = -9.0f;  // costly but half an overtake — aggressive, not reckless
+    private const float ALPHA_SPEED_SCALE        =  0.025f;// raised: big per-step speed hunger
+    private const float ALPHA_REVERSE_PENALTY    = -0.15f; // 15× stronger — wrong way = bad
+    private const float ALPHA_TIME_PENALTY       = -0.002f;// raised: constant pressure to go fast
+    private const float ALPHA_OVERTAKE_REWARD    = 30.0f;  // overtaking is the whole game
+    private const float ALPHA_SPIN_PENALTY       = -0.06f; // per rad/s above threshold — teaches braking before corners
+
+    // Wrong-way timeout: end episode if going backwards for too many consecutive steps
+    private const int   WRONG_WAY_TIMEOUT        = 150;    // raised: was 60, gave too little time to recover from spawn
+    private const int   SPAWN_GRACE_STEPS        = 100;    // first N steps after spawn are timeout-immune
 
     // ─────────────────────────────────────────────────────────
     // BETA — Passive, Slow & Precise
@@ -40,15 +45,31 @@ public class CarDriverAgent : Agent {
     //   walls and other cars. Will slow down to avoid any risk.
     //   Rewards come from doing the right thing, not raw speed.
     // ─────────────────────────────────────────────────────────
-    private const float BETA_CHECKPOINT_REWARD   =  7.0f;  // checkpoints are everything
-    private const float BETA_WRONG_CHECKPOINT    = -5.0f;  // hates going the wrong way
+    private const float BETA_CHECKPOINT_REWARD   = 25.0f;  // large: first discovery must be an unmissable signal
+    private const float BETA_WRONG_CHECKPOINT    = -3.0f;  // reduced: less brutal during exploration
     private const float BETA_LAP_REWARD          = 20.0f;
-    private const float BETA_WALL_PENALTY        = -8.0f;  // wall = catastrophic
-    private const float BETA_CAR_COLLISION       = -20.0f; // contact is forbidden
-    private const float BETA_SPEED_SCALE         =  0.003f;// small speed bonus — not the priority
-    private const float BETA_REVERSE_PENALTY     = -0.08f; // strongly dislikes going backwards
-    private const float BETA_TIME_PENALTY        = -0.003f;// still penalized for being too slow
+    private const float BETA_WALL_PENALTY        = -6.0f;  // raised at 2M steps — Beta is finding checkpoints, walls should deter now
+    private const float BETA_CAR_COLLISION       = -12.0f; // still painful but not episode-ending by itself
+    private const float BETA_SPEED_SCALE         =  0.006f;// modest speed bonus
+    private const float BETA_REVERSE_PENALTY     = -0.12f; // reduced: still penalised, not spiral-inducing
+    private const float BETA_TIME_PENALTY        = -0.001f;
+    private const float BETA_APPROACH_SCALE      =  0.03f; // continuous reward for getting physically closer to checkpoint
+    private const float BETA_SPIN_PENALTY        = -0.10f; // stronger: precision driver must NOT spin out
     private const float BETA_OVERTAKE_REWARD     =  3.0f;  // passing is nice but not the goal
+
+    // ─────────────────────────────────────────────────────────
+    // Shared spawn shuffle — guarantees every car gets a unique slot
+    // ─────────────────────────────────────────────────────────
+    private static readonly int[] s_spawnSlots = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 };
+
+    private static void ShuffleSpawnSlots() {
+        for (int i = s_spawnSlots.Length - 1; i > 0; i--) {
+            int j = UnityEngine.Random.Range(0, i + 1);
+            int tmp      = s_spawnSlots[i];
+            s_spawnSlots[i] = s_spawnSlots[j];
+            s_spawnSlots[j] = tmp;
+        }
+    }
 
     // ─────────────────────────────────────────────────────────
     // Shared overtake tracking
@@ -56,8 +77,11 @@ public class CarDriverAgent : Agent {
     private static readonly Dictionary<Transform, int> s_progressRegistry
         = new Dictionary<Transform, int>();
 
-    private int myLapsCompleted = 0;
-    private int myLastRank      = 0;
+    private int   myLapsCompleted         = 0;
+    private int   myLastRank              = 0;
+    private int   m_wrongWaySteps         = 0;
+    private int   m_spawnSteps            = 0;
+    private float m_prevDistToCheckpoint  = 0f; // for Beta continuous approach reward
 
     private CarController carController;
     private Rigidbody rb;
@@ -117,8 +141,28 @@ public class CarDriverAgent : Agent {
             carColor = betaColors[slot];
         }
 
-        foreach (var r in GetComponentsInChildren<Renderer>())
-            r.material.color = carColor;
+        // Iterate every renderer's material slots and color only the hull paint
+        // material (identified by name containing "16"). If nothing matches,
+        // agent 0 will log all material names to the Console so you can adjust.
+        bool anyColored = false;
+        foreach (var r in GetComponentsInChildren<Renderer>()) {
+            Material[] mats = r.materials; // returns per-instance copies
+            bool changed = false;
+            for (int mi = 0; mi < mats.Length; mi++) {
+                if (myIndex == 0)
+                    Debug.Log($"[CarColor] renderer={r.name}  mat[{mi}]={mats[mi].name}");
+
+                if (mats[mi].name.IndexOf("16", System.StringComparison.OrdinalIgnoreCase) >= 0) {
+                    mats[mi].color = carColor;
+                    changed = true;
+                    anyColored = true;
+                }
+            }
+            if (changed) r.materials = mats; // write instances back
+        }
+
+        if (!anyColored)
+            Debug.LogWarning($"[CarColor] Agent {myIndex}: no material containing '16' found. Check Console logs above for material names.");
 
         // ── Track events ──────────────────────────────────────
         track.OnCarCorrectCheckpoint += (car) => {
@@ -139,8 +183,13 @@ public class CarDriverAgent : Agent {
     }
 
     public override void OnEpisodeBegin() {
-        int row = myIndex / 4;
-        int col = myIndex % 4;
+        // Deterministic grid — no shared mutable state, no race conditions.
+        // Teams are interleaved: agent indices are mapped so Alphas (0-7) and
+        // Betas (8-15) alternate across columns rather than occupying separate rows.
+        //   slot = even spread: 0→0, 1→2, 2→4 ... 7→14, 8→1, 9→3 ... 15→15
+        int slot = (myIndex < 8) ? myIndex * 2 : (myIndex - 8) * 2 + 1;
+        int row  = slot / 4;
+        int col  = slot % 4;
 
         float scaleMult = (trackGenerator != null) ? trackGenerator.globalScaleMultiplier : 1f;
         float offsetX   = (-4.5f + (col * 3f)) * scaleMult;
@@ -153,8 +202,11 @@ public class CarDriverAgent : Agent {
         track.ResetCheckpoints(transform);
         carController.StopCompletely();
 
-        myLapsCompleted = 0;
-        myLastRank      = 0;
+        myLapsCompleted         = 0;
+        myLastRank              = 0;
+        m_wrongWaySteps         = 0;
+        m_spawnSteps            = 0;
+        m_prevDistToCheckpoint  = -1f; // -1 signals "not initialised yet"
         s_progressRegistry[transform] = 0;
     }
 
@@ -198,14 +250,60 @@ public class CarDriverAgent : Agent {
         Vector3 dirToCheckpoint  = (nextCheckpoint.position - transform.position).normalized;
         float speedTowardCP      = Vector3.Dot(rb.linearVelocity, dirToCheckpoint);
 
-        if (speedTowardCP > 0.5f) {
-            float scale = team == AgentTeam.Alpha ? ALPHA_SPEED_SCALE : BETA_SPEED_SCALE;
-            AddReward(speedTowardCP * scale);
-        } else if (speedTowardCP < -0.1f) {
-            AddReward(team == AgentTeam.Alpha ? ALPHA_REVERSE_PENALTY : BETA_REVERSE_PENALTY);
+        // Increment grace period counter — timeouts are frozen for first SPAWN_GRACE_STEPS steps
+        m_spawnSteps++;
+        bool inGrace = m_spawnSteps < SPAWN_GRACE_STEPS;
+
+        if (team == AgentTeam.Alpha) {
+            // Alpha: quadratic speed reward — going fast is exponentially better
+            if (speedTowardCP > 0.5f) {
+                AddReward(speedTowardCP * speedTowardCP * ALPHA_SPEED_SCALE);
+                m_wrongWaySteps = 0;
+            } else if (!inGrace && speedTowardCP < -0.1f) {
+                AddReward(ALPHA_REVERSE_PENALTY);
+                m_wrongWaySteps++;
+                if (m_wrongWaySteps >= WRONG_WAY_TIMEOUT) {
+                    m_wrongWaySteps = 0;
+                    EndEpisode();
+                    return;
+                }
+            } else {
+                m_wrongWaySteps = 0;
+            }
+        } else {
+            // Beta: reward physical progress toward checkpoint each step.
+            // This fires even for slow / indirect movement — no checkpoint needed.
+            float distToCP = (nextCheckpoint.position - transform.position).magnitude;
+            if (m_prevDistToCheckpoint >= 0f) {
+                float approach = m_prevDistToCheckpoint - distToCP; // positive = getting closer
+                if (approach > 0f)
+                    AddReward(approach * BETA_APPROACH_SCALE);
+            }
+            m_prevDistToCheckpoint = distToCP;
+
+            // Still penalise sustained reverse after grace period
+            if (!inGrace && speedTowardCP < -0.1f) {
+                AddReward(BETA_REVERSE_PENALTY);
+                m_wrongWaySteps++;
+                if (m_wrongWaySteps >= WRONG_WAY_TIMEOUT) {
+                    m_wrongWaySteps = 0;
+                    EndEpisode();
+                    return;
+                }
+            } else {
+                m_wrongWaySteps = 0;
+            }
         }
 
         AddReward(team == AgentTeam.Alpha ? ALPHA_TIME_PENALTY : BETA_TIME_PENALTY);
+
+        // ── Spin penalty (shared) — discourages entering corners too fast ──
+        // yaw rate > 1.5 rad/s = car is starting to lose control in a turn
+        float yawRate = Mathf.Abs(rb.angularVelocity.y);
+        if (yawRate > 1.5f) {
+            float scale = team == AgentTeam.Alpha ? ALPHA_SPIN_PENALTY : BETA_SPIN_PENALTY;
+            AddReward((yawRate - 1.5f) * scale); // scales with severity, 0 below threshold
+        }
 
         // ── Overtake detection ────────────────────────────────
         int checkpointCount   = track.GetCheckpointCount();

@@ -36,8 +36,8 @@ public class MapRotator : MonoBehaviour
             }
         }
 
-        // If more than half of the agents crashed in under 60 seconds, or the 60s learning limit expires entirely
-        if (timer <= 0f || aliveCount < (agents.Length / 2.0f)) {
+        // If more than 75% of the agents crashed, or the time limit expires
+        if (timer <= 0f || aliveCount < (agents.Length * 0.25f)) {
             TriggerMapWipe();
             timer = rotationTimeSeconds;
         }
